@@ -1,0 +1,191 @@
+import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  StyleSheet,
+} from 'react-native';
+import { useLeave } from '../context/LeaveContext';
+
+const EmployeeLeavesScreen = ({ navigation }) => {
+  const leaveContext = useLeave?.() || {};
+  const leaves = Array.isArray(leaveContext?.leaves) ? leaveContext.leaves : [];
+
+  const handleAddLeave = () => {
+    navigation.navigate('AddEmployeeLeave');
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Employee Leaves</Text>
+
+        <Image
+          source={require('../assets/mlogo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {leaves.length === 0 ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyText}>No leave records found</Text>
+          </View>
+        ) : (
+          leaves.map(item => (
+            <View key={item.id} style={styles.leaveCard}>
+              <View style={styles.rowBetween}>
+                <Text style={styles.leaveType}>{item?.type || 'Leave'}</Text>
+                <Text
+                  style={[
+                    styles.status,
+                    item?.status === 'Approved'
+                      ? styles.approved
+                      : item?.status === 'Pending'
+                      ? styles.pending
+                      : styles.rejected,
+                  ]}
+                >
+                  {item?.status || 'Pending'}
+                </Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>From:</Text>
+                <Text style={styles.value}>{item?.fromDate || '-'}</Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>To:</Text>
+                <Text style={styles.value}>{item?.toDate || '-'}</Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Days:</Text>
+                <Text style={styles.value}>{item?.days || 0}</Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Reason:</Text>
+                <Text style={styles.value}>{item?.reason || '-'}</Text>
+              </View>
+            </View>
+          ))
+        )}
+        <View>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddLeave}>
+            <Text style={styles.addButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+export default EmployeeLeavesScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    padding: 12,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 10,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111',
+  },
+  logo: {
+    width: 40,
+    height: 40,
+  },
+
+  addButton: {
+    backgroundColor: '#1E88E5',
+    marginHorizontal: 320,
+    width: 60,
+    height: 60,
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  emptyCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    marginTop: 20,
+    elevation: 2,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#777',
+  },
+  leaveCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 14,
+    elevation: 2,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  leaveType: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#111',
+  },
+  status: {
+    fontSize: 13,
+    fontWeight: '700',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  approved: {
+    backgroundColor: '#D4EDDA',
+    color: '#155724',
+  },
+  pending: {
+    backgroundColor: '#FFF3CD',
+    color: '#856404',
+  },
+  rejected: {
+    backgroundColor: '#F8D7DA',
+    color: '#721C24',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 14,
+    color: '#777',
+  },
+  value: {
+    fontSize: 14,
+    color: '#222',
+    fontWeight: '500',
+  },
+});

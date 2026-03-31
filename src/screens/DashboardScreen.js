@@ -7,8 +7,12 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
+import { useLeave } from '../context/LeaveContext';
 
 const DashboardScreen = ({ navigation }) => {
+  const leaveContext = useLeave?.() || {};
+  const leaves = Array.isArray(leaveContext?.leaves) ? leaveContext.leaves : [];
+
   const handleViewEmployment = () => {
     navigation.navigate('Employment');
   };
@@ -16,6 +20,12 @@ const DashboardScreen = ({ navigation }) => {
   const handleViewTimesheet = () => {
     navigation.navigate('Timesheet');
   };
+
+  const handleViewLeaves = () => {
+    navigation.navigate('EmployeeLeaves');
+  };
+
+  const totalLeaves = leaves.length;
 
   return (
     <View style={styles.safeArea}>
@@ -80,10 +90,14 @@ const DashboardScreen = ({ navigation }) => {
             <Text style={styles.amount}>₹2500</Text>
           </View>
 
-          <View style={styles.smallCard}>
-            <Text style={styles.smallTitle}>Leaves</Text>
-            <Text style={styles.amount}>10 Days</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.smallCard}
+            activeOpacity={0.8}
+            onPress={handleViewLeaves}
+          >
+            <Text style={styles.smallTitle}>Total Leaves</Text>
+            <Text style={styles.amount}>{totalLeaves} Leaves</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.card}>
@@ -127,12 +141,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -142,18 +154,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     elevation: 2,
   },
-
   headerText: {
     fontSize: 20,
     fontWeight: '700',
     color: '#111',
   },
-
   logo: {
     width: 40,
     height: 40,
   },
-
   welcomeCard: {
     backgroundColor: '#fff',
     marginHorizontal: 12,
@@ -165,32 +174,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 2,
   },
-
   welcome: {
     color: '#888',
     fontSize: 14,
     marginBottom: 4,
   },
-
   name: {
     fontWeight: '700',
     fontSize: 18,
     color: '#111',
   },
-
   badge: {
     backgroundColor: '#6C5CE7',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
-
   badgeText: {
     color: '#fff',
     fontSize: 13,
     fontWeight: '600',
   },
-
   card: {
     backgroundColor: '#fff',
     marginHorizontal: 12,
@@ -199,57 +203,48 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 2,
   },
-
   rowBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-
   cardTitle: {
     fontWeight: '700',
     fontSize: 17,
     color: '#111',
   },
-
   button: {
     backgroundColor: '#1E88E5',
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 8,
   },
-
   buttonText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 14,
   },
-
   detailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
   },
-
   label: {
     color: '#888',
     fontSize: 14,
   },
-
   valueText: {
     color: '#222',
     fontSize: 14,
     fontWeight: '500',
   },
-
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: 12,
     marginTop: 14,
   },
-
   smallCard: {
     backgroundColor: '#fff',
     padding: 16,
@@ -257,19 +252,16 @@ const styles = StyleSheet.create({
     width: '48%',
     elevation: 2,
   },
-
   smallTitle: {
     color: '#888',
     fontSize: 14,
   },
-
   amount: {
     fontWeight: '700',
     marginTop: 6,
     fontSize: 16,
     color: '#111',
   },
-
   timeCard: {
     backgroundColor: '#F1F2F6',
     padding: 12,
@@ -277,19 +269,16 @@ const styles = StyleSheet.create({
     width: '48%',
     marginTop: 10,
   },
-
   timeCardFull: {
     backgroundColor: '#F1F2F6',
     padding: 12,
     borderRadius: 10,
     marginTop: 12,
   },
-
   timeLabel: {
     color: '#666',
     fontSize: 14,
   },
-
   time: {
     fontWeight: '700',
     marginTop: 6,
