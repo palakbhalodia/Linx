@@ -1,6 +1,5 @@
 import apiClient from './apiClient';
 
-// ================= GET LEAVE LIST =================
 export const getLeaveList = async employeeId => {
   try {
     const response = await apiClient.get(`/api/leaves/${employeeId}`);
@@ -11,7 +10,6 @@ export const getLeaveList = async employeeId => {
   }
 };
 
-// ================= ADD LEAVE =================
 export const addLeave = async payload => {
   try {
     const response = await apiClient.post(`/api/leaves/apply`, payload);
@@ -22,7 +20,6 @@ export const addLeave = async payload => {
   }
 };
 
-// ================= GET LEAVE COUNT =================
 export const getLeaveCount = async employeeId => {
   try {
     const response = await apiClient.get(`/api/leaves/count/${employeeId}`);

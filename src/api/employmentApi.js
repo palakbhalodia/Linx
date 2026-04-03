@@ -4,7 +4,6 @@ export const getEmploymentDetails = async employeeId => {
   try {
     console.log('Calling Employment API with employeeId:', employeeId);
 
-    // 🔥 Actual route tame swagger mujab change kari sako
     const response = await apiClient.get(`/api/employees/${employeeId}`);
 
     console.log('Employment API Response:', response.data);

@@ -162,7 +162,6 @@ const TimesheetScreen = ({ navigation, route }) => {
     }
   };
 
-  // ADD NEW ENTRY
   useEffect(() => {
     if (route.params?.newEntry) {
       const newItem = route.params.newEntry;
@@ -211,7 +210,6 @@ const TimesheetScreen = ({ navigation, route }) => {
     }
   }, [route.params?.newEntry, navigation]);
 
-  // UPDATE ENTRY
   useEffect(() => {
     if (route.params?.updatedEntry) {
       const updatedItem = route.params.updatedEntry;
@@ -491,7 +489,6 @@ const TimesheetScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>{'‹'}</Text>
@@ -507,7 +504,6 @@ const TimesheetScreen = ({ navigation, route }) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Summary */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryTopRow}>
             <View style={styles.summaryBox}>
@@ -527,7 +523,6 @@ const TimesheetScreen = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Buttons */}
         <View style={styles.topButtonsRow}>
           <TouchableOpacity style={styles.submitButton}>
             <Text style={styles.submitButtonText}>Submit for Review</Text>
@@ -542,7 +537,6 @@ const TimesheetScreen = ({ navigation, route }) => {
           Showing: {selectedMonth} ({selectedDateRange})
         </Text>
 
-        {/* Timesheet List */}
         {filteredTimesheetData.length > 0 ? (
           filteredTimesheetData.map((section, index) => (
             <View key={index} style={styles.dateCard}>
@@ -606,7 +600,6 @@ const TimesheetScreen = ({ navigation, route }) => {
         )}
       </ScrollView>
 
-      {/* Floating Add Button */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('AddTimesheet')}
@@ -614,7 +607,6 @@ const TimesheetScreen = ({ navigation, route }) => {
         <Text style={styles.fabText}>＋</Text>
       </TouchableOpacity>
 
-      {/* FILTER MODAL */}
       <Modal
         visible={filterVisible}
         transparent
@@ -680,7 +672,6 @@ const TimesheetScreen = ({ navigation, route }) => {
         </Pressable>
       </Modal>
 
-      {/* CALENDAR MODAL */}
       <Modal
         visible={calendarVisible}
         transparent
