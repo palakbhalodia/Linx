@@ -10,12 +10,9 @@ const apiClient = axios.create({
   },
 });
 
-// ================= REQUEST INTERCEPTOR =================
 apiClient.interceptors.request.use(
   async config => {
     try {
-      // Future ma token hoy to uncomment karjo
-      // const token = await AsyncStorage.getItem('token');
       const token = null;
 
       if (token) {
@@ -40,7 +37,6 @@ apiClient.interceptors.request.use(
   error => Promise.reject(error),
 );
 
-// ================= RESPONSE INTERCEPTOR =================
 apiClient.interceptors.response.use(
   response => {
     console.log('================ API RESPONSE ================');

@@ -10,7 +10,6 @@ export const getTimesheetList = async employeeId => {
   } catch (error) {
     console.log('Timesheet API Error:', error?.response || error);
 
-    // Temporary fallback data
     return [
       {
         date: '05-10-2024',

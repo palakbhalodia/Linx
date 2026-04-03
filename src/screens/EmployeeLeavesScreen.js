@@ -87,6 +87,10 @@ const EmployeeLeavesScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.back}>{'‹'}</Text>
+        </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Employee Leaves</Text>
 
         <Image
@@ -176,6 +180,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     marginTop: 10,
+  },
+  back: {
+    fontSize: 28,
+    color: '#000',
   },
   headerTitle: {
     fontSize: 22,

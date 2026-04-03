@@ -17,7 +17,6 @@ const EmploymentScreen = ({ navigation, route }) => {
   const [employmentData, setEmploymentData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ================= LOAD DATA =================
   useEffect(() => {
     fetchEmploymentDetails();
   }, []);
@@ -43,7 +42,6 @@ const EmploymentScreen = ({ navigation, route }) => {
     }
   };
 
-  // ================= NAVIGATION =================
   const handleSectionPress = title => {
     if (!employmentData) return;
 
@@ -68,7 +66,6 @@ const EmploymentScreen = ({ navigation, route }) => {
     }
   };
 
-  // ================= OFFER LETTER =================
   const handlePreview = async () => {
     const url = employmentData?.offerLetterUrl;
 
@@ -103,7 +100,6 @@ const EmploymentScreen = ({ navigation, route }) => {
     }
   };
 
-  // ================= LOADER =================
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -112,7 +108,6 @@ const EmploymentScreen = ({ navigation, route }) => {
     );
   }
 
-  // ================= UI =================
   return (
     <View style={styles.container}>
       {/* HEADER */}
@@ -131,7 +126,6 @@ const EmploymentScreen = ({ navigation, route }) => {
       </View>
 
       <View style={styles.content}>
-        {/* JOB DETAILS */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('Job Details')}
@@ -140,7 +134,6 @@ const EmploymentScreen = ({ navigation, route }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
-        {/* BASE COMPENSATION */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('Base Compensation')}
@@ -149,7 +142,6 @@ const EmploymentScreen = ({ navigation, route }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
-        {/* BENEFITS */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('Benefits')}
@@ -158,7 +150,6 @@ const EmploymentScreen = ({ navigation, route }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
-        {/* GENERAL TERMS */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('General Terms')}
@@ -167,7 +158,6 @@ const EmploymentScreen = ({ navigation, route }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
-        {/* OFFER LETTER */}
         <View style={styles.offerCard}>
           <Text style={styles.offerTitle}>Offer Letter</Text>
 
@@ -194,7 +184,6 @@ const EmploymentScreen = ({ navigation, route }) => {
 
 export default EmploymentScreen;
 
-// ================= STYLES =================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
