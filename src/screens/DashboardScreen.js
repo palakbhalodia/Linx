@@ -22,7 +22,7 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const handleViewLeaves = () => {
-    navigation.navigate('EmployeeLeaves');
+    navigation.navigate('EmployeeLeavesScreen');
   };
 
   const totalLeaves = leaves.length;

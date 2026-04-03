@@ -9,8 +9,17 @@ import {
   Alert,
 } from 'react-native';
 
-const JobDetailsScreen = ({ navigation }) => {
+const JobDetailsScreen = ({ navigation, route }) => {
+  const jobDetails = route?.params?.jobDetails || {};
+  const offerLetterName = route?.params?.offerLetterName || 'No file';
+  const offerLetterUrl = route?.params?.offerLetterUrl || '';
+
   const handleDownload = fileName => {
+    if (!offerLetterUrl) {
+      Alert.alert('Error', 'File URL not found');
+      return;
+    }
+
     Alert.alert('Download', `${fileName} download clicked`);
   };
 
@@ -32,39 +41,23 @@ const JobDetailsScreen = ({ navigation }) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.label}>Job Title</Text>
-        <Text style={styles.value}>Account Coordinator</Text>
+        <Text style={styles.value}>{jobDetails?.designation || '-'}</Text>
 
-        <Text style={[styles.label, { marginTop: 18 }]}>Job Description</Text>
-        <Text style={styles.description}>
-          We are looking for an Account Coordinator to provide day-to-day
-          administrative support to our Account Executives and Account
-          Representatives to ensure smooth sales procedures.
-        </Text>
+        <Text style={[styles.label, { marginTop: 18 }]}>Department</Text>
+        <Text style={styles.description}>{jobDetails?.department || '-'}</Text>
+
+        <Text style={[styles.label, { marginTop: 18 }]}>Joining Date</Text>
+        <Text style={styles.value}>{jobDetails?.joiningDate || '-'}</Text>
 
         <Text style={[styles.label, { marginTop: 20 }]}>Uploaded</Text>
 
         <View style={styles.fileCard}>
           <View style={styles.fileLeft}>
             <Text style={styles.fileIcon}>📄</Text>
-            <Text style={styles.fileName}>Job-details2023.pdf</Text>
+            <Text style={styles.fileName}>{offerLetterName}</Text>
           </View>
 
-          <TouchableOpacity
-            onPress={() => handleDownload('Job-details2023.pdf')}
-          >
-            <Text style={styles.downloadIcon}>⬇️</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.fileCard}>
-          <View style={styles.fileLeft}>
-            <Text style={styles.fileIcon}>📄</Text>
-            <Text style={styles.fileName}>JobDescription2023.pdf</Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => handleDownload('JobDescription2023.pdf')}
-          >
+          <TouchableOpacity onPress={() => handleDownload(offerLetterName)}>
             <Text style={styles.downloadIcon}>⬇️</Text>
           </TouchableOpacity>
         </View>
@@ -144,6 +137,7 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 15,
     color: '#666',
+    flex: 1,
   },
   downloadIcon: {
     fontSize: 20,

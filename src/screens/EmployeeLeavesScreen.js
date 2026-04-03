@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,83 @@ import {
   ScrollView,
   Image,
   StyleSheet,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-import { useLeave } from '../context/LeaveContext';
+import { getLeaveList } from '../api/leaveApi';
 
-const EmployeeLeavesScreen = ({ navigation }) => {
-  const leaveContext = useLeave?.() || {};
-  const leaves = Array.isArray(leaveContext?.leaves) ? leaveContext.leaves : [];
+const EmployeeLeavesScreen = ({ navigation, route }) => {
+  const employeeId = route?.params?.employeeId || 1;
+
+  const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLeaveData();
+  }, []);
+
+  useEffect(() => {
+    if (route?.params?.newLeave) {
+      const newLeave = {
+        id: Date.now().toString(),
+        type: route.params.newLeave.type || 'Leave',
+        leaveType: route.params.newLeave.type || 'Leave',
+        fromDate: route.params.newLeave.fromDate || '-',
+        toDate: route.params.newLeave.toDate || '-',
+        startDate: route.params.newLeave.fromDate || '-',
+        endDate: route.params.newLeave.toDate || '-',
+        days: route.params.newLeave.days || 1,
+        reason: route.params.newLeave.reason || '-',
+        status: 'Pending',
+      };
+
+      setLeaves(prev => [newLeave, ...prev]);
+      navigation.setParams({ newLeave: null });
+    }
+  }, [route?.params?.newLeave, navigation]);
+
+  const fetchLeaveData = async () => {
+    try {
+      setLoading(true);
+
+      const data = await getLeaveList(employeeId);
+
+      if (Array.isArray(data)) {
+        setLeaves(data);
+      } else if (Array.isArray(data?.data)) {
+        setLeaves(data.data);
+      } else if (Array.isArray(data?.leaves)) {
+        setLeaves(data.leaves);
+      } else {
+        setLeaves([]);
+      }
+    } catch (error) {
+      console.log('Leave Screen Error:', error);
+
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Leave data load error.';
+
+      Alert.alert('Error', backendMessage);
+      setLeaves([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddLeave = () => {
-    navigation.navigate('AddEmployeeLeave');
+    navigation.navigate('AddEmployeeLeave', { employeeId });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#1E88E5" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -35,10 +102,12 @@ const EmployeeLeavesScreen = ({ navigation }) => {
             <Text style={styles.emptyText}>No leave records found</Text>
           </View>
         ) : (
-          leaves.map(item => (
-            <View key={item.id} style={styles.leaveCard}>
+          leaves.map((item, index) => (
+            <View key={item?.id || index} style={styles.leaveCard}>
               <View style={styles.rowBetween}>
-                <Text style={styles.leaveType}>{item?.type || 'Leave'}</Text>
+                <Text style={styles.leaveType}>
+                  {item?.type || item?.leaveType || 'Leave'}
+                </Text>
                 <Text
                   style={[
                     styles.status,
@@ -55,12 +124,16 @@ const EmployeeLeavesScreen = ({ navigation }) => {
 
               <View style={styles.detailRow}>
                 <Text style={styles.label}>From:</Text>
-                <Text style={styles.value}>{item?.fromDate || '-'}</Text>
+                <Text style={styles.value}>
+                  {item?.fromDate || item?.startDate || '-'}
+                </Text>
               </View>
 
               <View style={styles.detailRow}>
                 <Text style={styles.label}>To:</Text>
-                <Text style={styles.value}>{item?.toDate || '-'}</Text>
+                <Text style={styles.value}>
+                  {item?.toDate || item?.endDate || '-'}
+                </Text>
               </View>
 
               <View style={styles.detailRow}>
@@ -75,11 +148,10 @@ const EmployeeLeavesScreen = ({ navigation }) => {
             </View>
           ))
         )}
-        <View>
-          <TouchableOpacity style={styles.addButton} onPress={handleAddLeave}>
-            <Text style={styles.addButtonText}>+</Text>
-          </TouchableOpacity>
-        </View>
+
+        <TouchableOpacity style={styles.addButton} onPress={handleAddLeave}>
+          <Text style={styles.addButtonText}>+</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -92,6 +164,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
     padding: 12,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -109,19 +186,20 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
-
   addButton: {
     backgroundColor: '#1E88E5',
-    marginHorizontal: 320,
+    alignSelf: 'flex-end',
     width: 60,
     height: 60,
-    padding: 14,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 20,
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '600',
   },
   emptyCard: {

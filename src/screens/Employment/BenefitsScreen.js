@@ -8,7 +8,9 @@ import {
   ScrollView,
 } from 'react-native';
 
-const BenefitsScreen = ({ navigation }) => {
+const BenefitsScreen = ({ navigation, route }) => {
+  const benefits = route?.params?.benefits || {};
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -27,20 +29,26 @@ const BenefitsScreen = ({ navigation }) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.label}>Health Insurance</Text>
-        <Text style={styles.value}>No health insurance</Text>
+        <Text style={styles.value}>
+          {benefits?.medical ? 'Available' : 'No health insurance'}
+        </Text>
 
         <Text style={styles.sectionTitle}>Extra Benefits</Text>
 
         <View style={styles.divider} />
 
         <View style={styles.benefitCard}>
-          <Text style={styles.benefitTitle}>Disability Insurance</Text>
-          <Text style={styles.benefitAmount}>Amount: ₹10000</Text>
+          <Text style={styles.benefitTitle}>Provident Fund (PF)</Text>
+          <Text style={styles.benefitAmount}>
+            {benefits?.pf ? 'Yes' : 'No'}
+          </Text>
         </View>
 
         <View style={styles.benefitCard}>
-          <Text style={styles.benefitTitle}>Travelling Allowance</Text>
-          <Text style={styles.benefitAmount}>Amount: ₹8000</Text>
+          <Text style={styles.benefitTitle}>Bonus</Text>
+          <Text style={styles.benefitAmount}>
+            {benefits?.bonus ? 'Yes' : 'No'}
+          </Text>
         </View>
       </ScrollView>
     </View>

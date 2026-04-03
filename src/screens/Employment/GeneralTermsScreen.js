@@ -47,7 +47,6 @@ const GeneralTermsScreen = ({ navigation }) => {
         <Text style={styles.label}>Notice Period</Text>
         <Text style={styles.value}>1 Months</Text>
 
-        {/* Employee Leaves */}
         <Text style={styles.sectionTitle}>Employee Leaves</Text>
         <View style={styles.divider} />
 
@@ -72,7 +71,6 @@ const GeneralTermsScreen = ({ navigation }) => {
           <Text style={styles.leaveDays}>Days: 5</Text>
         </View>
 
-        {/* Equipment Request */}
         <Text style={styles.sectionTitle}>Equipment Request</Text>
         <View style={styles.divider} />
 

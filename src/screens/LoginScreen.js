@@ -20,7 +20,7 @@ const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // ✅ Your Temporary Working Test User
+  //  Your Temporary Working Test User
   const TEST_USER = {
     email: 'testlinx@gmail.com',
     password: '123456',

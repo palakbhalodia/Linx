@@ -10,12 +10,12 @@ import {
   Switch,
   Alert,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
-import { useLeave } from '../context/LeaveContext';
+import { addLeave } from '../api/leaveApi';
 
-const AddEmployeeLeaveScreen = ({ navigation }) => {
-  const leaveContext = useLeave?.() || {};
-  const addLeave = leaveContext?.addLeave || (() => {});
+const AddEmployeeLeaveScreen = ({ navigation, route }) => {
+  const employeeId = route?.params?.employeeId || 1;
 
   const [leaveType, setLeaveType] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -23,9 +23,10 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [details, setDetails] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const [dateModalVisible, setDateModalVisible] = useState(false);
-  const [activeDateField, setActiveDateField] = useState('start'); // 'start' | 'end'
+  const [activeDateField, setActiveDateField] = useState('start');
 
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(
@@ -47,18 +48,18 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
   ];
 
   const months = [
-    { label: '01', value: '01' },
-    { label: '02', value: '02' },
-    { label: '03', value: '03' },
-    { label: '04', value: '04' },
-    { label: '05', value: '05' },
-    { label: '06', value: '06' },
-    { label: '07', value: '07' },
-    { label: '08', value: '08' },
-    { label: '09', value: '09' },
-    { label: '10', value: '10' },
-    { label: '11', value: '11' },
-    { label: '12', value: '12' },
+    '01',
+    '02',
+    '03',
+    '04',
+    '05',
+    '06',
+    '07',
+    '08',
+    '09',
+    '10',
+    '11',
+    '12',
   ];
 
   const years = useMemo(() => {
@@ -139,7 +140,7 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
     setShowDropdown(false);
   };
 
-  const handleAddLeave = () => {
+  const handleAddLeave = async () => {
     if (!leaveType || !startDate || !endDate || !details) {
       Alert.alert('Validation', 'Please fill all required fields');
       return;
@@ -150,9 +151,10 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
       return;
     }
 
-    const days = halfDay ? 0.5 : calculateDays();
+    const totalDays = halfDay ? 0.5 : calculateDays();
 
-    addLeave({
+    const payload = {
+      employeeId,
       type: leaveType,
       title: leaveType,
       fromDate: startDate,
@@ -163,13 +165,27 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
       reviewedBy: 'None',
       detail: details,
       reason: details,
-      days,
-    });
+      days: totalDays,
+      halfDay,
+    };
+
+    try {
+      setLoading(true);
+      await addLeave(payload);
+    } catch (error) {
+      console.log('Add Leave Error:', error);
+    } finally {
+      setLoading(false);
+    }
 
     Alert.alert('Success', 'Leave added successfully', [
       {
         text: 'OK',
-        onPress: () => navigation.goBack(),
+        onPress: () =>
+          navigation.navigate('EmployeeLeavesScreen', {
+            newLeave: payload,
+            employeeId,
+          }),
       },
     ]);
   };
@@ -228,7 +244,6 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.formContainer}>
-          {/* Leave Type */}
           <Text style={styles.label}>
             Leave Type <Text style={styles.required}>*</Text>
           </Text>
@@ -263,19 +278,16 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
             </View>
           )}
 
-          {/* Half Day */}
           <View style={styles.switchRow}>
             <Text style={styles.label}>Half Day</Text>
             <Switch value={halfDay} onValueChange={setHalfDay} />
           </View>
 
-          {/* Start Date */}
           <Text style={styles.label}>
             Start Date <Text style={styles.required}>*</Text>
           </Text>
           <TouchableOpacity
             style={styles.dateInput}
-            activeOpacity={0.8}
             onPress={() => openDateModal('start')}
           >
             <Text
@@ -286,13 +298,11 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
             <Text style={styles.calendarIcon}>📅</Text>
           </TouchableOpacity>
 
-          {/* End Date */}
           <Text style={styles.label}>
             End Date <Text style={styles.required}>*</Text>
           </Text>
           <TouchableOpacity
             style={styles.dateInput}
-            activeOpacity={0.8}
             onPress={() => openDateModal('end')}
           >
             <Text style={[styles.dateText, !endDate && styles.placeholderText]}>
@@ -300,15 +310,6 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
             </Text>
             <Text style={styles.calendarIcon}>📅</Text>
           </TouchableOpacity>
-
-          <Text style={styles.label}>Document</Text>
-          <View style={styles.uploadBox}>
-            <Text style={styles.uploadIcon}>⇪</Text>
-            <Text style={styles.selectText}>Select File</Text>
-            <Text style={styles.fileText}>
-              .pdf, .jpg, .png, .doc and .docx files are supported.
-            </Text>
-          </View>
 
           <Text style={styles.label}>
             Additional Details <Text style={styles.required}>*</Text>
@@ -322,20 +323,22 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
             onChangeText={setDetails}
             maxLength={500}
           />
-          <Text style={styles.note}>Max 500 characters allowed</Text>
 
-          <TouchableOpacity style={styles.button} onPress={handleAddLeave}>
-            <Text style={styles.buttonText}>Add Leave</Text>
+          <TouchableOpacity
+            style={[styles.button, loading && { opacity: 0.7 }]}
+            onPress={handleAddLeave}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Add Leave</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      <Modal
-        visible={dateModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setDateModalVisible(false)}
-      >
+      <Modal visible={dateModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>
@@ -353,7 +356,7 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
               />
               <PickerColumn
                 title="Month"
-                data={months.map(m => m.value)}
+                data={months}
                 selectedValue={selectedMonth}
                 onSelect={setSelectedMonth}
               />
@@ -390,10 +393,7 @@ const AddEmployeeLeaveScreen = ({ navigation }) => {
 export default AddEmployeeLeaveScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
+  container: { flex: 1, backgroundColor: '#F5F5F5' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -403,23 +403,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     elevation: 2,
   },
-  logo: {
-    width: 40,
-    height: 40,
-  },
-  back: {
-    fontSize: 26,
-    color: '#111',
-    fontWeight: '600',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111',
-  },
-  formContainer: {
-    padding: 14,
-  },
+  logo: { width: 40, height: 40 },
+  back: { fontSize: 26, color: '#111', fontWeight: '600' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#111' },
+  formContainer: { padding: 14 },
   label: {
     fontSize: 14,
     fontWeight: '600',
@@ -427,9 +414,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 10,
   },
-  required: {
-    color: 'red',
-  },
+  required: { color: 'red' },
   dropdownInput: {
     backgroundColor: '#fff',
     borderWidth: 1,
@@ -441,17 +426,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  dropdownText: {
-    fontSize: 15,
-    color: '#111',
-  },
-  placeholderText: {
-    color: '#999',
-  },
-  dropdownArrow: {
-    fontSize: 14,
-    color: '#555',
-  },
+  dropdownText: { fontSize: 15, color: '#111' },
+  placeholderText: { color: '#999' },
+  dropdownArrow: { fontSize: 14, color: '#555' },
   dropdownMenu: {
     backgroundColor: '#fff',
     borderWidth: 1,
@@ -466,10 +443,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  dropdownItemText: {
-    fontSize: 15,
-    color: '#111',
-  },
+  dropdownItemText: { fontSize: 15, color: '#111' },
   switchRow: {
     marginTop: 14,
     marginBottom: 8,
@@ -488,40 +462,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  dateText: {
-    fontSize: 15,
-    color: '#111',
-  },
-  calendarIcon: {
-    fontSize: 18,
-  },
-  uploadBox: {
-    backgroundColor: '#F8F8F8',
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingVertical: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  uploadIcon: {
-    fontSize: 28,
-    color: '#666',
-  },
-  selectText: {
-    color: '#1E88E5',
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 8,
-  },
-  fileText: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 8,
-    textAlign: 'center',
-    paddingHorizontal: 12,
-  },
+  dateText: { fontSize: 15, color: '#111' },
+  calendarIcon: { fontSize: 18 },
   textArea: {
     backgroundColor: '#fff',
     borderWidth: 1,
@@ -533,11 +475,6 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     color: '#111',
   },
-  note: {
-    fontSize: 11,
-    color: '#999',
-    marginTop: 6,
-  },
   button: {
     backgroundColor: '#1E88E5',
     marginTop: 18,
@@ -546,13 +483,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  /* Modal */
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.35)',
@@ -572,13 +503,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     textAlign: 'center',
   },
-  pickerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  pickerColumn: {
-    width: '31%',
-  },
+  pickerRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  pickerColumn: { width: '31%' },
   pickerTitle: {
     fontSize: 14,
     fontWeight: '700',
@@ -586,9 +512,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
-  pickerScroll: {
-    maxHeight: 220,
-  },
+  pickerScroll: { maxHeight: 220 },
   pickerItem: {
     paddingVertical: 12,
     borderRadius: 10,
@@ -596,18 +520,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4F6F8',
     alignItems: 'center',
   },
-  pickerItemSelected: {
-    backgroundColor: '#1E88E5',
-  },
-  pickerItemText: {
-    fontSize: 15,
-    color: '#111',
-    fontWeight: '500',
-  },
-  pickerItemTextSelected: {
-    color: '#fff',
-    fontWeight: '700',
-  },
+  pickerItemSelected: { backgroundColor: '#1E88E5' },
+  pickerItemText: { fontSize: 15, color: '#111', fontWeight: '500' },
+  pickerItemTextSelected: { color: '#fff', fontWeight: '700' },
   modalButtonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -620,20 +535,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cancelButton: {
-    backgroundColor: '#ECEFF1',
-  },
-  confirmButton: {
-    backgroundColor: '#1E88E5',
-  },
-  cancelButtonText: {
-    color: '#333',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  confirmButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  cancelButton: { backgroundColor: '#ECEFF1' },
+  confirmButton: { backgroundColor: '#1E88E5' },
+  cancelButtonText: { color: '#333', fontSize: 15, fontWeight: '700' },
+  confirmButtonText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

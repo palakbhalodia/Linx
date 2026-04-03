@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,31 +6,116 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ActivityIndicator,
+  Linking,
 } from 'react-native';
+import { getEmploymentDetails } from '../../api/employmentApi';
 
-const EmploymentScreen = ({ navigation }) => {
-  const handleSectionPress = title => {
-    if (title === 'Job Details') {
-      navigation.navigate('JobDetails');
-    } else if (title === 'Base Compensation') {
-      navigation.navigate('BaseCompensation');
-    } else if (title === 'Benefits') {
-      navigation.navigate('Benefits');
-    } else if (title === 'General Terms') {
-      navigation.navigate('GeneralTerms');
+const EmploymentScreen = ({ navigation, route }) => {
+  const employeeId = route?.params?.employeeId || 1;
+
+  const [employmentData, setEmploymentData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // ================= LOAD DATA =================
+  useEffect(() => {
+    fetchEmploymentDetails();
+  }, []);
+
+  const fetchEmploymentDetails = async () => {
+    try {
+      setLoading(true);
+
+      const data = await getEmploymentDetails(employeeId);
+
+      setEmploymentData(data);
+    } catch (error) {
+      console.log('Employment Screen Error:', error);
+
+      Alert.alert(
+        'Error',
+        error?.response?.data?.message ||
+          error?.message ||
+          'Failed to load employment details',
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handlePreview = () => {
-    Alert.alert('Preview', 'Offer letter preview clicked');
+  // ================= NAVIGATION =================
+  const handleSectionPress = title => {
+    if (!employmentData) return;
+
+    if (title === 'Job Details') {
+      navigation.navigate('JobDetails', {
+        jobDetails: employmentData.jobDetails,
+        offerLetterName: employmentData.offerLetterName,
+        offerLetterUrl: employmentData.offerLetterUrl,
+      });
+    } else if (title === 'Base Compensation') {
+      navigation.navigate('BaseCompensation', {
+        baseCompensation: employmentData.baseCompensation,
+      });
+    } else if (title === 'Benefits') {
+      navigation.navigate('Benefits', {
+        benefits: employmentData.benefits,
+      });
+    } else if (title === 'General Terms') {
+      navigation.navigate('GeneralTerms', {
+        generalTerms: employmentData.generalTerms,
+      });
+    }
   };
 
-  const handleDownload = () => {
-    Alert.alert('Download', 'Offer letter download clicked');
+  // ================= OFFER LETTER =================
+  const handlePreview = async () => {
+    const url = employmentData?.offerLetterUrl;
+
+    if (!url) {
+      Alert.alert('Error', 'Offer letter not available');
+      return;
+    }
+
+    const supported = await Linking.canOpenURL(url);
+
+    if (supported) {
+      Linking.openURL(url);
+    } else {
+      Alert.alert('Error', 'Cannot open this file');
+    }
   };
 
+  const handleDownload = async () => {
+    const url = employmentData?.offerLetterUrl;
+
+    if (!url) {
+      Alert.alert('Error', 'Offer letter not available');
+      return;
+    }
+
+    const supported = await Linking.canOpenURL(url);
+
+    if (supported) {
+      Linking.openURL(url);
+    } else {
+      Alert.alert('Error', 'Download failed');
+    }
+  };
+
+  // ================= LOADER =================
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#1E88E5" />
+      </View>
+    );
+  }
+
+  // ================= UI =================
   return (
     <View style={styles.container}>
+      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>{'‹'}</Text>
@@ -46,6 +131,7 @@ const EmploymentScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.content}>
+        {/* JOB DETAILS */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('Job Details')}
@@ -54,6 +140,7 @@ const EmploymentScreen = ({ navigation }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
+        {/* BASE COMPENSATION */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('Base Compensation')}
@@ -62,6 +149,7 @@ const EmploymentScreen = ({ navigation }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
+        {/* BENEFITS */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('Benefits')}
@@ -70,6 +158,7 @@ const EmploymentScreen = ({ navigation }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
+        {/* GENERAL TERMS */}
         <TouchableOpacity
           style={styles.card}
           onPress={() => handleSectionPress('General Terms')}
@@ -78,10 +167,12 @@ const EmploymentScreen = ({ navigation }) => {
           <Text style={styles.arrow}>{'›'}</Text>
         </TouchableOpacity>
 
+        {/* OFFER LETTER */}
         <View style={styles.offerCard}>
           <Text style={styles.offerTitle}>Offer Letter</Text>
+
           <Text style={styles.fileName}>
-            ramya-subramanian-offer-letter.pdf
+            {employmentData?.offerLetterName || 'No file available'}
           </Text>
 
           <View style={styles.dottedLine} />
@@ -103,10 +194,16 @@ const EmploymentScreen = ({ navigation }) => {
 
 export default EmploymentScreen;
 
+// ================= STYLES =================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F6F6F6',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     height: 60,

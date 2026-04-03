@@ -8,85 +8,10 @@ import {
   ScrollView,
   Modal,
   Pressable,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-
-const initialTimesheetData = [
-  {
-    date: '05-10-2024',
-    entries: [
-      {
-        id: '1',
-        title: 'Home Page Design',
-        project: 'Website Design',
-        status: 'Review',
-        billable: 'Non Billable',
-        hours: '04:00',
-        startTime: '09:00 AM',
-        endTime: '01:00 PM',
-      },
-      {
-        id: '2',
-        title: 'About Us Page Design',
-        project: 'Website Design',
-        status: 'Pending',
-        billable: 'Non Billable',
-        hours: '02:00',
-        startTime: '02:00 PM',
-        endTime: '04:00 PM',
-      },
-      {
-        id: '3',
-        title: 'Services Page Design',
-        project: 'Website Design',
-        status: 'Pending',
-        billable: 'Non Billable',
-        hours: '02:00',
-        startTime: '04:00 PM',
-        endTime: '06:00 PM',
-      },
-    ],
-  },
-  {
-    date: '25-11-2024',
-    entries: [
-      {
-        id: '4',
-        title: 'Home Page HTML',
-        project: 'Troth',
-        status: 'Approved',
-        billable: 'Billable',
-        hours: '08:00',
-        startTime: '09:00 AM',
-        endTime: '05:00 PM',
-      },
-    ],
-  },
-  {
-    date: '26-11-2024',
-    entries: [
-      {
-        id: '5',
-        title: 'About us Page HTML',
-        project: 'Troth',
-        status: 'Reject',
-        billable: 'Non Billable',
-        hours: '06:00',
-        startTime: '09:00 AM',
-        endTime: '03:00 PM',
-      },
-      {
-        id: '6',
-        title: 'About us Page HTML',
-        project: 'Troth',
-        status: 'Review',
-        billable: 'Non Billable',
-        hours: '02:00',
-        startTime: '04:00 PM',
-        endTime: '06:00 PM',
-      },
-    ],
-  },
-];
+import { getTimesheetList } from '../../api/timesheetApi';
 
 const monthOptions = [
   'Current Month',
@@ -140,7 +65,6 @@ const convertInputDateToCardDate = dateText => {
 
   const parts = dateText.split('-');
 
-  // already DD-MM-YYYY
   if (parts[0].length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
     return dateText;
   }
@@ -194,7 +118,10 @@ const calculateHours = (startTime, endTime) => {
 };
 
 const TimesheetScreen = ({ navigation, route }) => {
-  const [timesheetData, setTimesheetData] = useState(initialTimesheetData);
+  const employeeId = route?.params?.employeeId || 1;
+
+  const [loading, setLoading] = useState(true);
+  const [timesheetData, setTimesheetData] = useState([]);
 
   const [filterVisible, setFilterVisible] = useState(false);
   const [monthDropdownVisible, setMonthDropdownVisible] = useState(false);
@@ -212,6 +139,28 @@ const TimesheetScreen = ({ navigation, route }) => {
   const [startDay, setStartDay] = useState(1);
   const [endDay, setEndDay] = useState(31);
   const [selectingStart, setSelectingStart] = useState(true);
+
+  useEffect(() => {
+    fetchTimesheetData();
+  }, []);
+
+  const fetchTimesheetData = async () => {
+    try {
+      setLoading(true);
+      const data = await getTimesheetList(employeeId);
+      setTimesheetData(data || []);
+    } catch (error) {
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Timesheet load error.';
+
+      Alert.alert('Error', backendMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ADD NEW ENTRY
   useEffect(() => {
@@ -532,6 +481,14 @@ const TimesheetScreen = ({ navigation, route }) => {
     return days;
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#1E88E5" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -804,6 +761,11 @@ export default TimesheetScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
     height: 60,
     backgroundColor: '#fff',

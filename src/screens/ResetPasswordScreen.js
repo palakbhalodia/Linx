@@ -23,7 +23,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
     state => state.auth,
   );
 
-  // ✅ Email ForgotPassword screen થી આવશે
+  // Email ForgotPassword screen થી આવશે
   const email = route?.params?.email || '';
 
   const [code, setCode] = useState('');
@@ -32,7 +32,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     if (error) {
-      // ✅ Dev fallback for testing
+      // Dev fallback for testing
       if (
         email.trim().toLowerCase() === 'testlinx@gmail.com' &&
         code.trim() === '1234'

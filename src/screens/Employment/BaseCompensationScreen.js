@@ -8,7 +8,9 @@ import {
   ScrollView,
 } from 'react-native';
 
-const BaseCompensationScreen = ({ navigation }) => {
+const BaseCompensationScreen = ({ navigation, route }) => {
+  const baseCompensation = route?.params?.baseCompensation || {};
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -32,18 +34,25 @@ const BaseCompensationScreen = ({ navigation }) => {
         <Text style={[styles.label, { marginTop: 18 }]}>
           Gross Salary - Monthly
         </Text>
-        <Text style={styles.value}>INR 50000</Text>
+        <Text style={styles.value}>
+          {baseCompensation?.currency || 'INR'}{' '}
+          {baseCompensation?.salary || '-'}
+        </Text>
 
         <Text style={styles.sectionTitle}>Extra Allowances</Text>
 
         <View style={styles.divider} />
 
         <View style={styles.allowanceCard}>
-          <Text style={styles.allowanceTitle}>Trip Allowance</Text>
+          <Text style={styles.allowanceTitle}>Salary Package</Text>
 
           <View style={styles.allowanceRow}>
-            <Text style={styles.allowanceSub}>Taxable: Yes</Text>
-            <Text style={styles.allowanceAmount}>Amount: ₹10000</Text>
+            <Text style={styles.allowanceSub}>
+              Currency: {baseCompensation?.currency || '-'}
+            </Text>
+            <Text style={styles.allowanceAmount}>
+              Amount: ₹{baseCompensation?.salary || '-'}
+            </Text>
           </View>
         </View>
       </ScrollView>
